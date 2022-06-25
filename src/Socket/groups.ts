@@ -89,18 +89,21 @@ export const makeGroupsSocket = (config: SocketConfig) => {
 			const result = await groupQuery(
 				jid,
 				'set',
-				participants.map(
-					jid => ({
+				[
+					{
 						tag: action,
 						attrs: { },
-						content: [{ tag: 'participant', attrs: { jid } }]
-					})
-				)
+						content: participants.map(jid => ({
+							tag: 'participant',
+							attrs: { jid }
+						}))
+					}
+				]
 			)
 			const node = getBinaryNodeChild(result, action)
 			const participantsAffected = getBinaryNodeChildren(node!, 'participant')
 			return participantsAffected.map(p => {
-				return { status: p.attrs.error || 200, jid: p.attrs.jid }
+				return { status: p.attrs.error || '200', jid: p.attrs.jid }
 			})
 		},
 		groupUpdateDescription: async(jid: string, description?: string) => {
