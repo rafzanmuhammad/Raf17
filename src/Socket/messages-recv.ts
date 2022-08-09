@@ -87,7 +87,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 
 		logger.debug({ call_id, caller: callOfferData[call_id].from, me: authState.creds.me.id, }, 'rejecting call')
 		await sendNode(stanza)
-	
+	}
 
 	const sendRetryRequest = async(node: BinaryNode, forceIncludeKeys = false) => {
 		const msgId = node.attrs.id
