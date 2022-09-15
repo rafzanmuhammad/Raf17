@@ -64,7 +64,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		logger.debug({ recv: { tag, attrs }, sent: stanza.attrs }, 'sent ack')
 		await sendNode(stanza)
 	}
-	
+
 	const rejectCall = async(callId: string, callFrom: string) => {
 		const stanza: BinaryNode = ({
 			tag: 'call',
@@ -75,13 +75,13 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			content: [{
 			    tag: 'reject',
 			    attrs: {
-				'call-id': callId,
-				'call-creator': callFrom,
-				count: '0',
+					'call-id': callId,
+					'call-creator': callFrom,
+					count: '0',
 			    },
 			    content: undefined,
 			}],
-		});
+		})
 		await query(stanza)
 	}
 
