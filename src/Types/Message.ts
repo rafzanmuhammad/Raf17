@@ -42,6 +42,8 @@ export interface WAUrlInfo {
     title: string
     description?: string
     jpegThumbnail?: Buffer
+    highQualityThumbnail?: proto.Message.IImageMessage
+    originalThumbnailUrl?: string
 }
 
 // types to generate WA messages
@@ -192,6 +194,7 @@ export type WAMediaUploadFunction = (readStream: Readable, opts: { fileEncSha256
 
 export type MediaGenerationOptions = {
 	logger?: Logger
+    mediaTypeOverride?: MediaType
     upload: WAMediaUploadFunction
     /** cache media so it does not have to be uploaded again */
     mediaCache?: NodeCache

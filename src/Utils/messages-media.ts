@@ -97,20 +97,36 @@ export const extractImageThumb = async(bufferOrFilePath: Readable | Buffer | str
 
 	const lib = await getImageProcessingLibrary()
 	if('sharp' in lib) {
-		const result = await lib.sharp!.default(bufferOrFilePath)
+		const img = lib.sharp!.default(bufferOrFilePath)
+		const dimensions = await img.metadata()
+
+		const buffer = await img
 			.resize(width)
 			.jpeg({ quality: 50 })
 			.toBuffer()
-		return result
+		return {
+			buffer,
+			original: {
+				width: dimensions.width,
+				height: dimensions.height,
+			},
+		}
 	} else {
 		const { read, MIME_JPEG, RESIZE_BILINEAR, AUTO } = lib.jimp
 
 		const jimp = await read(bufferOrFilePath as any)
-		const result = await jimp
+		const dimensions = {
+			width: jimp.getWidth(),
+			height: jimp.getHeight()
+		}
+		const buffer = await jimp
 			.quality(50)
 			.resize(width, AUTO, RESIZE_BILINEAR)
 			.getBufferAsync(MIME_JPEG)
-		return result
+		return {
+			buffer,
+			original: dimensions
+		}
 	}
 }
 
@@ -223,9 +239,16 @@ export async function generateThumbnail(
     }
 ) {
 	let thumbnail: string | undefined
+	let originalImageDimensions: { width: number; height: number } | undefined
 	if(mediaType === 'image') {
-		const buff = await extractImageThumb(file)
-		thumbnail = buff.toString('base64')
+		const { buffer, original } = await extractImageThumb(file)
+		thumbnail = buffer.toString('base64')
+		if(original.width && original.height) {
+			originalImageDimensions = {
+				width: original.width,
+				height: original.height,
+			}
+		}
 	} else if(mediaType === 'video') {
 		const imgFilename = join(getTmpFilesDirectory(), generateMessageID() + '.jpg')
 		try {
@@ -239,7 +262,10 @@ export async function generateThumbnail(
 		}
 	}
 
-	return thumbnail
+	return {
+		thumbnail,
+		originalImageDimensions
+	}
 }
 
 export const getHttpStream = async(url: string | URL, options: AxiosRequestConfig & { isStream?: true } = {}) => {
